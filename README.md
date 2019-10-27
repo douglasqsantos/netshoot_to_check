@@ -45,7 +45,7 @@ And if you want to spin up a container on the host's network namespace.
 
 To troubleshoot these issues, `netshoot` includes a set of powerful tools as recommended by this diagram. 
 
-![](linux_observability_tools.png)
+![linux_observability_tools.png](img/linux_observability_tools.png)
 
 
 **Included Packages:** The following packages are included in `netshoot`. We'll go over some with some sample use-cases.
