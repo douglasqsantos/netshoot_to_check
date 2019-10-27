@@ -96,7 +96,7 @@ To troubleshoot these issues, `netshoot` includes a set of powerful tools as rec
     util-linux
     vim
 
-##**Docker EE 2.0 + Kubernetes Use Cases:** 
+## Docker EE 2.0 + Kubernetes Use Cases:
 Here's a list of use-cases that can help you understand when and how to use this container to solve networking issues in your Docker cluster. Please feel free to add your own use-case where you used `netshoot` to investigate, trouble-shoot, or just learn more about your environment!!!
 
 
@@ -165,7 +165,7 @@ metadata:
   resourceVersion: "6152496"
 ```
 
-## Docker + Swarm Use Cases:** 
+## Docker + Swarm Use Cases:
 
 ## iperf 
 
@@ -469,19 +469,19 @@ With `docker run --name container-B --net container:container-A `, docker uses `
 
 For example, if we wanted to check the L2 forwarding table for a overlay network. We need to enter the overlay network namespace and use same tools in `netshoot` to check these entries.  The following examples go over some use cases for using `nsenter` to understand what's happening within a docker network ( overlay in this case).
 
-# Creating an overlay network
+Creating an overlay network
 ```
 🐳  → docker network create -d overlay nsenter-test
 9tp0f348donsdj75pktssd97b
 ```
 
-# Launching a simple busybox service with 3 replicas
+Launching a simple busybox service with 3 replicas
 ```
 🐳  → docker service create --name nsenter-l2-table-test --replicas 3 --network nsenter-test busybox ping localhost
 3692i3q3u8nephdco2c10ro4c
 ```
 
-# Inspecting the service
+Inspecting the service
 ```
 🐳  → docker network inspect nsenter-test
 [
@@ -533,12 +533,12 @@ For example, if we wanted to check the L2 forwarding table for a overlay network
 ]
 ```
 
-# Launching netshoot in privileged mode
+Launching netshoot in privileged mode
 ```
  🐳  → docker run -it --rm -v /var/run/docker/netns:/var/run/docker/netns --privileged=true douglasqsantos/netshoot
 ```
 
-# Listing all docker-created network namespaces
+Listing all docker-created network namespaces
 ``` 
  / # cd /var/run/docker/netns/
 /var/run/docker/netns # ls
@@ -546,12 +546,12 @@ For example, if we wanted to check the L2 forwarding table for a overlay network
 1-9r17dodsxt  1159c401b8d8  1a508036acc8  7ca29d89293c  83b743f2f087  aeed676a57a5  default       f22ffa5115a0
 ```
 
-# The overlay network that we created had an id of 9tp0f348donsdj75pktssd97b. All overlay networks are named <number>-<id>. We can see it in the list as `1-9tp0f348do`. To enter it:
+The overlay network that we created had an id of 9tp0f348donsdj75pktssd97b. All overlay networks are named <number>-<id>. We can see it in the list as `1-9tp0f348do`. To enter it:
 ```
 / # nsenter --net=/var/run/docker/netns/1-9tp0f348do sh
 ```
 
-# Now all the commands we issue are within that namespace. 
+Now all the commands we issue are within that namespace.
 ```
 / # ifconfig
 br0       Link encap:Ethernet  HWaddr 02:15:B8:E7:DE:B3
@@ -605,7 +605,7 @@ vxlan1    Link encap:Ethernet  HWaddr EA:EC:1D:B1:7D:D7
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
 
-# Let's check out the L2 forwarding table. These MAC addresses belong to the tasks/containers in this service. 
+Let's check out the L2 forwarding table. These MAC addresses belong to the tasks/containers in this service.
 ```
 / # bridge  fdb show br br0
 33:33:00:00:00:01 dev br0 self permanent
@@ -626,13 +626,13 @@ ea:ec:1d:b1:7d:d7 dev vxlan1 master br0 permanent
 33:33:ff:a1:6a:87 dev veth4 self permanent
 ```
 
-# ARP and routing tables. Note that an overlay network only routes traffic for that network. It only has a single route that matches the subnet of that network.
+ARP and routing tables. Note that an overlay network only routes traffic for that network. It only has a single route that matches the subnet of that network.
 ```
 / # ip neigh show
 / # ip route
 10.0.1.0/24 dev br0  proto kernel  scope link  src 10.0.1.1
 ```
-# Looks like the arp table is flushed. Let's ping some of the containers on this network.
+Looks like the arp table is flushed. Let's ping some of the containers on this network.
 ```
 / # ping 10.0.1.4
 PING 10.0.1.4 (10.0.1.4) 56(84) bytes of data.
@@ -660,7 +660,7 @@ br0		8000.0215b8e7deb3	no		vxlan1
 ## CTOP
  ctop is a free open source, simple and cross-platform top-like command-line tool for monitoring container metrics in real-time. It allows you to get an overview of metrics concerning CPU, memory, network, I/O for multiple containers and also supports inspection of a specific container.
 
- # To get data into ctop, you'll need to bind docker.sock into the netshoot container.
+**To get data into ctop, you'll need to bind docker.sock into the netshoot container.**
 ```
 
 / # docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock douglasqsantos/netshoot ctop
