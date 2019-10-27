@@ -165,7 +165,7 @@ metadata:
   resourceVersion: "6152496"
 ```
 
-##**Docker + Swarm Use Cases:** 
+## Docker + Swarm Use Cases:** 
 
 ## iperf 
 
@@ -181,24 +181,27 @@ Launch two containers:
 ```
 🐳  → docker service create --name perf-test-a --network perf-test douglasqsantos/netshoot iperf -s -p 9999
 7dkcckjs0g7b4eddv8e5ez9nv
+```
 
-
+```
 🐳  → docker service create --name perf-test-b --network perf-test douglasqsantos/netshoot iperf -c perf-test-a -p 9999
 2yb6fxls5ezfnav2z93lua8xl
+```
 
-
-
+```
  🐳  → docker service ls
 ID            NAME         REPLICAS  IMAGE              COMMAND
 2yb6fxls5ezf  perf-test-b  1/1       douglasqsantos/netshoot  iperf -c perf-test-a -p 9999
 7dkcckjs0g7b  perf-test-a  1/1       douglasqsantos/netshoot  iperf -s -p 9999
+```
 
-
-
+```
 🐳  → docker ps
 CONTAINER ID        IMAGE                      COMMAND                  CREATED             STATUS              PORTS               NAMES
 ce4ff40a5456        douglasqsantos/netshoot:latest   "iperf -s -p 9999"       31 seconds ago      Up 30 seconds                           perf-test-a.1.bil2mo8inj3r9nyrss1g15qav
+```
 
+```
 🐳  → docker logs ce4ff40a5456
 ------------------------------------------------------------
 Server listening on TCP port 9999
@@ -208,20 +211,20 @@ TCP window size: 85.3 KByte (default)
 [ ID] Interval       Transfer     Bandwidth
 [  4]  0.0-10.0 sec  32.7 GBytes  28.1 Gbits/sec
 [  5] local 10.0.3.3 port 9999 connected with 10.0.3.5 port 35112
-
 ```
 
 ## tcpdump
 
 **tcpdump** is a powerful and common packet analyzer that runs under the command line. It allows the user to display TCP/IP and other packets being transmitted or received over an attached network interface. 
 
-```
-# Continuing on the iperf example. Let's launch netshoot with perf-test-a's container network namespace.
 
+# Continuing on the iperf example. Let's launch netshoot with perf-test-a's container network namespace.
+```
 🐳  → docker run -it --net container:perf-test-a.1.0qlf1kaka0cq38gojf7wcatoa  douglasqsantos/netshoot 
+```
 
 # Capturing packets on eth0 and tcp port 9999.
-
+```
 / # tcpdump -i eth0 port 9999 -c 1 -Xvv
 tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 23:14:09.771825 IP (tos 0x0, ttl 64, id 60898, offset 0, flags [DF], proto TCP (6), length 64360)
@@ -354,17 +357,23 @@ Purpose: a simple Unix utility that reads and writes data across network connect
 ```
 🐳  →  docker network create -d overlay my-ovl
 55rohpeerwqx8og4n0byr0ehu
-
-🐳  → docker service create --name service-a --network my-ovl -p 8080:8080 douglasqsantos/netshoot nc -l 8080
-bnj517hh4ylpf7ewawsp9unrc
-
-🐳  → docker service create --name service-b --network my-ovl douglasqsantos/netshoot nc -vz service-a 8080
-3xv1ukbd3kr03j4uybmmlp27j
-
-🐳  → docker logs service-b.1.0c5wy4104aosovtl1z9oixiso
-Connection to service-a 8080 port [tcp/http-alt] succeeded!
+```
 
 ```
+🐳  → docker service create --name service-a --network my-ovl -p 8080:8080 douglasqsantos/netshoot nc -l 8080
+bnj517hh4ylpf7ewawsp9unrc
+```
+
+```
+🐳  → docker service create --name service-b --network my-ovl douglasqsantos/netshoot nc -vz service-a 8080
+3xv1ukbd3kr03j4uybmmlp27j
+```
+
+```
+🐳  → docker logs service-b.1.0c5wy4104aosovtl1z9oixiso
+Connection to service-a 8080 port [tcp/http-alt] succeeded!
+```
+
 ##  netgen
 `netgen` is a simple [script](netgen.sh) that will generate a packet of data between containers periodically using `netcat`. It's purpose is to use the generated traffic to demonstrate different features of the networking stack.
 
@@ -376,16 +385,22 @@ Using `netgen` with `docker run`:
 ```
 🐳  →  docker network create -d bridge br
 01b167971453700cf0a40d7e1a0dc2b0021e024bbb119541cc8c1858343c9cfc
+```
 
+```
 🐳  →  docker run -d --rm --net br --name c1 douglasqsantos/netshoot netgen c2 5000
 8c51eb2100c35d14244dcecb80839c780999159985415a684258c7154ec6bd42
+```
 
+```
 🐳  →  docker run -it --rm --net br --name c2 douglasqsantos/netshoot netgen c1 5000
 Listener started on port 5000
 Sending traffic to c1 on port 5000 every 10 seconds
 Sent 1 messages to c1:5000
 Sent 2 messages to c1:5000
+```
 
+```
 🐳  →  sudo tcpdump -vvvn -i eth0 port 5000
 ...
 ```
@@ -395,10 +410,13 @@ Using `netgen` with `docker services`:
 ```
 🐳  →  docker network create -d overlay ov
 01b167971453700cf0a40d7e1a0dc2b0021e024bbb119541cc8c1858343c9cfc
-
+```
+```
 🐳  →  docker service create --network ov --replicas 3 --name srvc netshoot netgen srvc 5000
 y93t8mb9wgzsc27f7l2rdu5io
+```
 
+```
 🐳  →  docker service logs srvc
 srvc.1.vwklts5ybq5w@moby    | Listener started on port 5000
 srvc.1.vwklts5ybq5w@moby    | Sending traffic to srvc on port 5000 every 10 seconds
@@ -406,8 +424,9 @@ srvc.1.vwklts5ybq5w@moby    | Sent 1 messages to srvc:5000
 srvc.3.dv4er00inlxo@moby    | Listener started on port 5000
 srvc.2.vu47gf0sdmje@moby    | Listener started on port 5000
 ...
+```
 
-
+```
 🐳  →  sudo tcpdump -vvvn -i eth0 port 5000
 ...
 ```
@@ -450,16 +469,20 @@ With `docker run --name container-B --net container:container-A `, docker uses `
 
 For example, if we wanted to check the L2 forwarding table for a overlay network. We need to enter the overlay network namespace and use same tools in `netshoot` to check these entries.  The following examples go over some use cases for using `nsenter` to understand what's happening within a docker network ( overlay in this case).
 
-```
 # Creating an overlay network
+```
 🐳  → docker network create -d overlay nsenter-test
 9tp0f348donsdj75pktssd97b
+```
 
 # Launching a simple busybox service with 3 replicas
+```
 🐳  → docker service create --name nsenter-l2-table-test --replicas 3 --network nsenter-test busybox ping localhost
 3692i3q3u8nephdco2c10ro4c
+```
 
 # Inspecting the service
+```
 🐳  → docker network inspect nsenter-test
 [
     {
@@ -508,24 +531,28 @@ For example, if we wanted to check the L2 forwarding table for a overlay network
         "Labels": {}
     }
 ]
+```
 
 # Launching netshoot in privileged mode
+```
  🐳  → docker run -it --rm -v /var/run/docker/netns:/var/run/docker/netns --privileged=true douglasqsantos/netshoot
- 
+```
+
 # Listing all docker-created network namespaces
- 
+``` 
  / # cd /var/run/docker/netns/
 /var/run/docker/netns # ls
 0b1b36d33313  1-9tp0f348do  14d1428c3962  645eb414b538  816b96054426  916dbaa7ea76  db9fd2d68a9b  e79049ce9994  f857b5c01ced
 1-9r17dodsxt  1159c401b8d8  1a508036acc8  7ca29d89293c  83b743f2f087  aeed676a57a5  default       f22ffa5115a0
-
+```
 
 # The overlay network that we created had an id of 9tp0f348donsdj75pktssd97b. All overlay networks are named <number>-<id>. We can see it in the list as `1-9tp0f348do`. To enter it:
-
+```
 / # nsenter --net=/var/run/docker/netns/1-9tp0f348do sh
+```
 
 # Now all the commands we issue are within that namespace. 
-
+```
 / # ifconfig
 br0       Link encap:Ethernet  HWaddr 02:15:B8:E7:DE:B3
           inet addr:10.0.1.1  Bcast:0.0.0.0  Mask:255.255.255.0
@@ -576,9 +603,10 @@ vxlan1    Link encap:Ethernet  HWaddr EA:EC:1D:B1:7D:D7
           TX packets:0 errors:0 dropped:33 overruns:0 carrier:0
           collisions:0 txqueuelen:0
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+```
 
 # Let's check out the L2 forwarding table. These MAC addresses belong to the tasks/containers in this service. 
-
+```
 / # bridge  fdb show br br0
 33:33:00:00:00:01 dev br0 self permanent
 01:00:5e:00:00:01 dev br0 self permanent
@@ -596,16 +624,16 @@ ea:ec:1d:b1:7d:d7 dev vxlan1 master br0 permanent
 33:33:00:00:00:01 dev veth4 self permanent
 01:00:5e:00:00:01 dev veth4 self permanent
 33:33:ff:a1:6a:87 dev veth4 self permanent
-
+```
 
 # ARP and routing tables. Note that an overlay network only routes traffic for that network. It only has a single route that matches the subnet of that network.
-
+```
 / # ip neigh show
 / # ip route
 10.0.1.0/24 dev br0  proto kernel  scope link  src 10.0.1.1
-
+```
 # Looks like the arp table is flushed. Let's ping some of the containers on this network.
-
+```
 / # ping 10.0.1.4
 PING 10.0.1.4 (10.0.1.4) 56(84) bytes of data.
 64 bytes from 10.0.1.4: icmp_seq=1 ttl=64 time=0.207 ms
