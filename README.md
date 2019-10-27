@@ -218,12 +218,12 @@ TCP window size: 85.3 KByte (default)
 **tcpdump** is a powerful and common packet analyzer that runs under the command line. It allows the user to display TCP/IP and other packets being transmitted or received over an attached network interface. 
 
 
-# Continuing on the iperf example. Let's launch netshoot with perf-test-a's container network namespace.
+Continuing on the iperf example. Let's launch netshoot with perf-test-a's container network namespace.
 ```
 🐳  → docker run -it --net container:perf-test-a.1.0qlf1kaka0cq38gojf7wcatoa  douglasqsantos/netshoot 
 ```
 
-# Capturing packets on eth0 and tcp port 9999.
+Capturing packets on eth0 and tcp port 9999.
 ```
 / # tcpdump -i eth0 port 9999 -c 1 -Xvv
 tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
